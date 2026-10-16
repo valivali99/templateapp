@@ -1,0 +1,68 @@
+<a mat-button routerLink="/dashboard"><mat-icon>arrow_back</mat-icon> Back to dashboard</a>
+
+<mat-card appearance="outlined" class="form-card">
+  @if (loading() || saving()) { <mat-progress-bar mode="indeterminate" /> }
+
+  <mat-card-header>
+    <mat-card-title>{{ isEdit() ? 'Edit tile' : 'New tile' }}</mat-card-title>
+    <mat-card-subtitle>The first image is shown on the dashboard</mat-card-subtitle>
+  </mat-card-header>
+
+  <form [formGroup]="form" (ngSubmit)="submit()">
+    <mat-card-content>
+      <mat-form-field appearance="outline">
+        <mat-label>Name</mat-label>
+        <input matInput formControlName="name" maxlength="120" />
+        @if (form.controls.name.hasError('required')) { <mat-error>Name is required</mat-error> }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Description</mat-label>
+        <textarea matInput formControlName="description" rows="5"></textarea>
+      </mat-form-field>
+
+      <h3 class="section-title">Images <span class="hint">({{ images().length }} / {{ maxImages }})</span></h3>
+
+      <div class="images">
+        @for (img of images(); track img.url; let i = $index, first = $first, last = $last) {
+          <div class="image" [class.main]="first">
+            <img [src]="img.url" alt="" />
+            @if (first) { <span class="badge">Main</span> }
+            @if (img.kind === 'new') { <span class="badge new">New</span> }
+            <div class="image-actions">
+              <button mat-icon-button type="button" (click)="move(i, i - 1)" [disabled]="first" matTooltip="Move left" aria-label="Move left">
+                <mat-icon>chevron_left</mat-icon>
+              </button>
+              <button mat-icon-button type="button" (click)="makeMain(i)" [disabled]="first" matTooltip="Make main" aria-label="Make main">
+                <mat-icon>star</mat-icon>
+              </button>
+              <button mat-icon-button type="button" (click)="remove(i)" matTooltip="Remove" aria-label="Remove">
+                <mat-icon>delete</mat-icon>
+              </button>
+              <button mat-icon-button type="button" (click)="move(i, i + 1)" [disabled]="last" matTooltip="Move right" aria-label="Move right">
+                <mat-icon>chevron_right</mat-icon>
+              </button>
+            </div>
+          </div>
+        }
+
+        @if (images().length < maxImages) {
+          <label class="dropzone" [class.over]="dragOver()"
+                 (dragover)="onDragOver($event)" (dragleave)="dragOver.set(false)" (drop)="onDrop($event)">
+            <input type="file" accept="image/*" multiple hidden (change)="onFilesPicked($event)" />
+            <mat-icon>add_photo_alternate</mat-icon>
+            <span>Add images</span>
+            <small>Click or drop · max 5 MB each</small>
+          </label>
+        }
+      </div>
+    </mat-card-content>
+
+    <mat-card-actions align="end">
+      <a mat-button routerLink="/dashboard">Cancel</a>
+      <button mat-flat-button type="submit" [disabled]="saving() || loading()">
+        {{ isEdit() ? 'Save changes' : 'Create tile' }}
+      </button>
+    </mat-card-actions>
+  </form>
+</mat-card>

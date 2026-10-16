@@ -1,0 +1,13 @@
+{
+  "name": "templateapp",
+  "private": true,
+  "scripts": {
+    "install:all": "npm install && npm --prefix backend install && npm --prefix template install",
+    "dev": "concurrently -n api,web -c blue,green \"npm --prefix backend run dev\" \"npm --prefix template start\"",
+    "start:api": "npm --prefix backend start",
+    "start:web": "npm --prefix template start"
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.6"
+  }
+}

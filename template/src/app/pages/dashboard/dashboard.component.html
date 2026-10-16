@@ -1,0 +1,64 @@
+<div class="page-header">
+  <div>
+    <h1>Dashboard</h1>
+    <p class="subtitle">{{ tiles().length }} {{ tiles().length === 1 ? 'tile' : 'tiles' }}</p>
+  </div>
+  @if (auth.isAdmin()) {
+    <a mat-flat-button routerLink="/tiles/new">
+      <mat-icon>add</mat-icon>
+      New tile
+    </a>
+  }
+</div>
+
+@if (loading()) {
+  <div class="state"><mat-spinner diameter="48" /></div>
+} @else if (error()) {
+  <div class="state">
+    <mat-icon class="state-icon">error_outline</mat-icon>
+    <p>{{ error() }}</p>
+    <button mat-stroked-button (click)="load()">Retry</button>
+  </div>
+} @else if (tiles().length === 0) {
+  <div class="state">
+    <mat-icon class="state-icon">grid_view</mat-icon>
+    <p>No tiles yet.</p>
+    @if (auth.isAdmin()) {
+      <a mat-stroked-button routerLink="/tiles/new">Create the first one</a>
+    }
+  </div>
+} @else {
+  <div class="grid">
+    @for (tile of tiles(); track tile.id) {
+      <mat-card class="tile" appearance="outlined" [routerLink]="['/tiles', tile.id]" tabindex="0"
+                (keydown.enter)="$any($event.currentTarget).click()">
+        <div class="tile-image">
+          @if (tile.mainImage) {
+            <img [src]="tile.mainImage" [alt]="tile.name" loading="lazy" />
+          } @else {
+            <mat-icon>image</mat-icon>
+          }
+          @if (tile.images.length > 1) {
+            <span class="count"><mat-icon>photo_library</mat-icon>{{ tile.images.length }}</span>
+          }
+        </div>
+        <mat-card-content>
+          <h2 class="tile-title">{{ tile.name }}</h2>
+          @if (tile.description) {
+            <p class="tile-desc">{{ tile.description }}</p>
+          }
+        </mat-card-content>
+        @if (auth.isAdmin()) {
+          <mat-card-actions align="end" (click)="stop($event)">
+            <a mat-icon-button [routerLink]="['/tiles', tile.id, 'edit']" matTooltip="Edit" aria-label="Edit">
+              <mat-icon>edit</mat-icon>
+            </a>
+            <button mat-icon-button (click)="confirmDelete(tile, $event)" matTooltip="Delete" aria-label="Delete">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </mat-card-actions>
+        }
+      </mat-card>
+    }
+  </div>
+}
